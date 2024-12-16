@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 
 const app = express()
 
-const port = 3000
+const port =  process.env.PORT || 3000
 
 
 // // how to respond to a req by using a "get" method in express
