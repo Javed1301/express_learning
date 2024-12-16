@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Server Code Explanation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #4CAF50;
+        }
+
+        code {
+            background: #4CAF50;;
+            padding: 2px 6px;
+            border-radius: 4px;
+
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        pre {
+            background: #333;
+            color: #eee;
+            padding: 15px;
+            overflow-x: auto;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .comment {
+            color: #d8e4e3;
+            font-size: 15px;
+            font-weight: 700;
+            
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="color: white;">Express Server Code Explanation</h1>
+    </header>
+
+    <div class="container">
+        <h1>Introduction</h1>
+        <p>This document explains a Node.js server built using the <code>Express.js</code> framework. The server provides a basic CRUD (Create, Read, Update, Delete) functionality for managing tea data. Below is a step-by-step explanation of the code.</p>
+
+        <h2>Code Explanation</h2>
+
+        <pre>
+<code class="comment">// Importing necessary modules</code>
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+        </pre>
+        <p>
+            The code imports the <code>express</code> module to create the server, <code>path</code> for working with file paths, and <code>fileURLToPath</code> to retrieve the current directory name in ES modules.
+        </p>
+
+        <pre>
+<code class="comment">// Initialize Express</code>
+const app = express();
+const port = 3000; <code class="comment">// Define the port number</code>
+        </pre>
+        <p>We create an instance of <code>express</code> called <code>app</code> and specify the server will run on port <code>3000</code>.</p>
+
+        <pre>
+<code class="comment">// Handle directory name for ES modules</code>
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+        </pre>
+        <p>Since ES modules do not have <code>__dirname</code>, we recreate it using <code>fileURLToPath</code> and <code>path.dirname</code>.</p>
+
+        <pre>
+<code class="comment">// Middleware for parsing JSON</code>
+app.use(express.json());
+        </pre>
+        <p>The <code>express.json()</code> middleware enables the server to parse incoming JSON requests.</p>
+
+        <pre>
+<code class="comment">// Initialize data and ID</code>
+let teaData = [];
+let nextid = 1;
+        </pre>
+        <p>An array <code>teaData</code> is used to store tea objects, and <code>nextid</code> generates unique IDs for each tea.</p>
+
+        <h3>1. Serving Static HTML</h3>
+        <pre>
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+        </pre>
+        <p>This route serves an <code>index.html</code> file from the current directory when the root URL (<code>/</code>) is accessed.</p>
+
+        <h3>2. Creating a Tea</h3>
+        <pre>
+app.post('/teas', (req, res) => {
+    const { name, price } = req.body;
+    const newTea = { id: nextid++, name, price };
+    teaData.push(newTea);
+    res.status(201).send(newTea);
+});
+        </pre>
+        <p>
+            This route handles <code>POST</code> requests to add a new tea. It extracts the <code>name</code> and <code>price</code> from the request body, assigns a unique ID, and stores it in the <code>teaData</code> array.
+        </p>
+
+        <h3>3. Fetching All Teas</h3>
+        <pre>
+app.get('/teas', (req, res) => {
+    res.status(200).send(teaData);
+});
+        </pre>
+        <p>This route returns all the teas stored in <code>teaData</code>.</p>
+
+        <h3>4. Fetching a Tea by ID</h3>
+        <pre>
+app.get('/teas/:id', (req, res) => {
+    const tea = teaData.find(t => t.id === parseInt(req.params.id));
+    if (!tea) {
+        return res.status(404).send('Tea not found');
+    }
+    res.status(200).send(tea);
+});
+        </pre>
+        <p>This route fetches a specific tea by its ID, returning a <code>404</code> error if not found.</p>
+
+        <h3>5. Updating a Tea</h3>
+        <pre>
+app.put('/teas/:id', (req, res) => {
+    const tea = teaData.find(t => t.id === parseInt(req.params.id));
+    if (!tea) {
+        return res.status(404).send('Tea not found');
+    }
+    const { name, price } = req.body;
+    tea.name = name;
+    tea.price = price;
+    res.status(200).send(tea);
+});
+        </pre>
+        <p>This route updates an existing tea's details using its ID.</p>
+
+        <h3>6. Deleting a Tea</h3>
+        <pre>
+app.delete('/teas/:id', (req, res) => {
+    const index = teaData.findIndex(t => t.id === parseInt(req.params.id));
+    if (index === -1) {
+        return res.status(404).send('Tea not found');
+    }
+    teaData.splice(index, 1);
+    res.status(200).send('deleted');
+});
+        </pre>
+        <p>This route deletes a tea by its ID, returning a <code>404</code> error if it doesn't exist.</p>
+
+        <h3>7. Starting the Server</h3>
+        <pre>
+app.listen(port, () => {
+    console.log(`Server is running at port : ${port}...`);
+});
+        </pre>
+        <p>The server listens on the specified <code>port</code> and logs a message indicating it has started.</p>
+
+        <h2>Conclusion</h2>
+        <p>This Express.js server provides full CRUD operations for managing tea data. The combination of clear routes and middleware makes it easy to extend further if needed.</p>
+    </div>
+
+    <h2>How HTTP Methods Work in Real-World Scenarios</h2>
+    <p>HTTP methods play a critical role in web development, allowing client-server communication to perform different operations. Here's how the methods used in this project can be applied in real-world scenarios:</p>
+    
+    <ul>
+        <li>
+            <strong>GET</strong>: 
+            Used to retrieve data. For example, when a customer visits a tea shop's website and views a list of available teas or details of a specific tea, the server responds with the requested data using <code>GET</code> methods.
+        </li>
+        <li>
+            <strong>POST</strong>: 
+            Used to create new data. For instance, if the tea shop admin wants to add a new tea to the menu via an admin dashboard, the data is sent to the server using the <code>POST</code> method.
+        </li>
+        <li>
+            <strong>PUT</strong>: 
+            Used to update existing data. For example, the admin might want to update the price or name of a tea. This change is sent to the server via the <code>PUT</code> method.
+        </li>
+        <li>
+            <strong>DELETE</strong>: 
+            Used to remove data. For example, if a tea is no longer available, the admin can send a request to the server using the <code>DELETE</code> method to remove it from the database.
+        </li>
+    </ul>
+    
+    <p><strong>Best Practices:</strong></p>
+    <ul>
+        <li>
+            Use <code>GET</code> only for fetching data and ensure sensitive information is not exposed in query strings.
+        </li>
+        <li>
+            Use <code>POST</code> for actions that modify data and are not idempotent (i.e., performing the same operation multiple times may lead to different results).
+        </li>
+        <li>
+            Use <code>PUT</code> for updating existing resources. This method is idempotent, meaning repeated requests with the same data will yield the same result.
+        </li>
+        <li>
+            Use <code>DELETE</code> cautiously to avoid accidental data loss. Implement authentication and confirmation steps where necessary.
+        </li>
+    </ul>
+    
+</body>
+</html>
