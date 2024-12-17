@@ -3,24 +3,14 @@ import 'dotenv/config'
 
 import path from "path";
 import { fileURLToPath } from "url";
-
+import logger from './logger.js'
+import morgan from 'morgan'
 
 const app = express()
 
 const port =  process.env.PORT || 3000
 
-
-// // how to respond to a req by using a "get" method in express
-// app.get("/",(req,res) =>{
-//     res.send("Hello from Javed and his Tea!..")
-// })
-// app.get("/ice-tea",(req,res) =>{
-//     res.send("What ice Tea would you prefer?..")
-// })
-// app.get("/watsapp",(req,res) =>{
-//     res.send("Javed is available at watsapp..")
-// })
-
+//shortcomings of console log and improvising our console log
 
 // accepting  data from frontend side.
 
@@ -30,6 +20,23 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json())
 
+
+//improving my console log for trackingg the activity which helps me to the debugging
+const morganFormat = ':method :url :status :response-time ms'
+
+app.use(morgan(morganFormat,{
+    stream: {
+        write: (message)=>{
+            const logObject = {
+                method: message.split(' ')[0],
+                url: message.split(' ')[1],
+                status: message.split(' ')[2],
+                responseTime: message.split(' ')[3],
+            };
+            logger.info(JSON.stringify(logObject));
+        }
+    }
+}))
 let teaData = []
 let nextid = 1
 
@@ -38,7 +45,17 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
+app.get("/index2.html", (req, res) => {
+    // Serve index.html from the current directory
+    res.sendFile(path.join(__dirname, "index2.html"));
+});
+app.get("/logger.html", (req, res) => {
+    // Serve index.html from the current directory
+    res.sendFile(path.join(__dirname, "logger.html"));
+});
+
 app.post('/teas',(req,res) =>{
+    console.log("POST")
     const {name,price}=req.body
     const newTea = {id: nextid++,name,price}
     teaData.push(newTea)

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improving Console Log Explanation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        .nav-buttons {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .nav-buttons a {
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 0 5px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color:#4CAF50;
+        }
+
+        code {
+            background: #4CAF50;;
+            padding: 2px 6px;
+            border-radius: 4px;
+
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        pre {
+            background: #263238;
+            color:white;
+            padding: 15px;
+            overflow-x: auto;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .comment {
+            color: #d8e4e3;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        ul {
+            margin: 20px 0;
+            padding: 0 20px;
+            list-style-type: disc;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="color: white;">Improving Console Log with Morgan and Logger.js</h1>
+    </header>
+    <div class="nav-buttons">
+        <a href="/">Home</a>
+        <a href="logger.html">end</a>
+    </div>
+
+    <div class="container">
+        <h1>Introduction</h1>
+        <p>
+            To enhance debugging and tracking server activities, the code uses the <code>morgan</code> middleware along with a custom logger implemented in <code>logger.js</code>. This section explains how these improvements make logging more structured and useful for identifying issues.
+        </p>
+
+        <h2>Code Explanation</h2>
+
+        <h3>Setting up Morgan for Logging</h3>
+        <pre>
+<code class="comment">// Defining a custom format for Morgan logs</code>
+const morganFormat = ':method :url :status :response-time ms';
+
+app.use(morgan(morganFormat, {
+    stream: {
+        write: (message) => {
+            <code class="comment">// Splitting the message into structured fields</code>
+            const logObject = {
+                method: message.split(' ')[0], <code class="comment">// HTTP Method (GET, POST, etc.)</code>
+                url: message.split(' ')[1],    <code class="comment">// Endpoint URL</code>
+                status: message.split(' ')[2], <code class="comment">// HTTP Status Code</code>
+                responseTime: message.split(' ')[3] <code class="comment">// Time taken for the response</code>
+            };
+            <code class="comment">// Logging the structured object as JSON</code>
+            logger.info(JSON.stringify(logObject));
+        }
+    }
+}));
+        </pre>
+
+        <p>
+            <code>morgan</code> is a popular HTTP request logger middleware for Node.js. Here, the custom format <code>:method :url :status :response-time ms</code> generates log entries that capture key details like:
+        </p>
+        <ul>
+            <li><strong>HTTP Method:</strong> The type of request made (e.g., GET, POST).</li>
+            <li><strong>URL:</strong> The endpoint being accessed (e.g., <code>/teas</code>).</li>
+            <li><strong>Status:</strong> The HTTP status code returned (e.g., 200, 404).</li>
+            <li><strong>Response Time:</strong> The time taken by the server to handle the request.</li>
+        </ul>
+
+        <h3>Custom Logging with logger.js</h3>
+        <p>
+            Instead of printing raw logs to the console, the code uses a <code>logger.js</code> file to structure and manage log messages. This approach ensures that logs are consistent and easier to analyze. The logged message is converted into a JSON object containing the request details, making it suitable for storage in log management systems.
+        </p>
+
+        <h3>Why Replace <code>console.log</code>?</h3>
+        <ul>
+            <li><strong>Readability:</strong> Logs are now structured and clearly define each field.</li>
+            <li><strong>Scalability:</strong> Using a dedicated logger allows integration with log monitoring tools like <code>Winston</code> or cloud-based log services.</li>
+            <li><strong>Debugging Efficiency:</strong> Filtering and analyzing logs become easier.</li>
+        </ul>
+
+        <h3>Real-World Use Case</h3>
+        <p>
+            In a real-world application, these logs can be forwarded to monitoring systems like <code>Elastic Stack</code>, <code>Datadog</code>, or <code>Papertrail</code>. This helps in tracking application performance, debugging issues, and gaining insights into user behavior.
+        </p>
+    </div>
+</body>
+</html>
